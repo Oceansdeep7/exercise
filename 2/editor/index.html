@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link
+            rel="stylesheet"
+            data-name="vs/editor/editor.main"
+            href="./node_modules/monaco-editor/min/vs/editor/editor.main.css"
+    />
+</head>
+<body>
+<div>
+    <input type="file" id="file-loader" accept=".js"/>
+    <button id="save-button">下载文件</button>
+</div>
+<div id="container" style="width: 800px; height: 600px; border: 1px solid grey"></div>
+
+<script>
+    const require = { paths: { vs: '../node_modules/monaco-editor/min/vs' } };
+</script>
+<script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
+<script src="./node_modules/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
+<script src="./node_modules/monaco-editor/min/vs/editor/editor.main.js"></script>
+
+<script>
+    const editor = monaco.editor.create(document.getElementById('container'), {
+        value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
+        language: 'javascript'
+    });
+
+    const loadButton = document.querySelector('#file-loader')
+    let file
+    loadButton.addEventListener('change', ()=>{
+        if(loadButton.files){
+            file = loadButton.files[0];
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                editor.setValue(evt.target.result)
+            };
+            reader.readAsText(file);
+        }
+    })
+
+    function download(text, name, type) {
+        const a = document.createElement("a");
+        const file = new Blob([text], {type: type});
+        a.href = URL.createObjectURL(file);
+        a.download = name;
+        a.click()
+    }
+    const saveButton = document.querySelector('#save-button')
+    saveButton.addEventListener('click', ()=>{
+        if(file){
+            download(editor.getValue(),file.name, 'text/plain')
+        }
+    })
+</script>
+</body>
+</html>
